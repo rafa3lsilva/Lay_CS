@@ -160,11 +160,10 @@ st.write(last_away_games)
 # Criação do DataFrame novo_df com base no results_filtrado
 novo_df = results_filtrado.copy()
 
-# Adição dos inputs para tamanho da banca e porcentagem a ser arriscada
-tamanho_banca_usuario = st.sidebar.number_input("Tamanho da Banca:", min_value=1.0, step=1.0)
-percentual_banca = st.sidebar.number_input("Percentual da Banca a Arriscar (%):", min_value=1.0, max_value=100.0, step=0.5) / 100
+# Adição do input para responsabilidade desejada
+responsabilidade_desejada = st.sidebar.number_input("Responsabilidade Desejada:", min_value=0.0, step=1.0)
 
-# Adição dos inputs para odds de mercado
+# Adição das odds de mercado ao novo_df
 odds_mercado = []
 for index, row in novo_df.iterrows():
     odd_mercado = st.sidebar.number_input(f"Odd de mercado para '{row['Placar']}':", min_value=1.01, step=0.01)
@@ -173,32 +172,37 @@ for index, row in novo_df.iterrows():
 # Adição das odds de mercado ao novo_df
 novo_df['Odd_Mercado'] = odds_mercado
 
-# Função para calcular a responsabilidade usando o critério de Kelly
-def calcular_responsabilidade_kelly(probabilidade, odd_justa, odd_mercado, tamanho_banca):
-    ev = (odd_justa / odd_mercado - 1)
-    return ev * tamanho_banca * probabilidade
+# Função para calcular o tamanho da stake com base na responsabilidade desejada
+def calcular_tamanho_stake(responsabilidade, odd_justa, odd_mercado):
+    return responsabilidade / (odd_mercado - 1)
 
-# Aplicação do critério de Kelly para calcular a responsabilidade
-novo_df['Responsabilidade'] = calcular_responsabilidade_kelly(novo_df['Probability'], novo_df['Odd_Justa'], novo_df['Odd_Mercado'], tamanho_banca_usuario)
-
-# Cálculo do tamanho da stake
-novo_df['Tamanho_Stake'] = novo_df['Responsabilidade'] / (novo_df['Odd_Mercado'] - 1)
+# Aplicação do cálculo do tamanho da stake
+novo_df['Tamanho_Stake'] = calcular_tamanho_stake(responsabilidade_desejada, novo_df['Odd_Justa'], novo_df['Odd_Mercado'])
 
 # Cálculo do lucro potencial
 comissao = 5.6 / 100  # Comissão de 5.6%
 novo_df['Lucro_Potencial'] = novo_df['Tamanho_Stake'] * (1 - comissao)
 
-# Arredondar Responsabilidade, Tamanho_Stake, Lucro_Potencial para duas casas decimais
-novo_df['Responsabilidade'] = novo_df['Responsabilidade'].round(2)
+# Função para calcular o tamanho da stake com base no critério de Kelly
+def calcular_tamanho_stake_kelly(probabilidade, odd_justa, odd_mercado):
+    if odd_mercado < odd_justa:  # Aposta de valor apenas se a odd de mercado for menor que a odd justa
+        kelly_fraction = (probabilidade * odd_justa - 1) / (odd_mercado - 1)
+        return kelly_fraction
+    else:
+        return 0  # Se a odd de mercado for maior ou igual à odd justa, não há aposta de valor
+
+# Aplicação do cálculo do tamanho da stake de acordo com o critério de Kelly
+novo_df['Tamanho_Stake_Kelly'] = novo_df.apply(lambda row: calcular_tamanho_stake_kelly(row['Probability'], row['Odd_Justa'], row['Odd_Mercado']), axis=1)
+
+# Arredondar Tamanho_Stake, Lucro_Potencial e Tamanho_Stake_Kelly para duas casas decimais
 novo_df['Tamanho_Stake'] = novo_df['Tamanho_Stake'].round(2)
 novo_df['Lucro_Potencial'] = novo_df['Lucro_Potencial'].round(2)
+novo_df['Tamanho_Stake_Kelly'] = novo_df['Tamanho_Stake_Kelly'].round(2)
 
-# Filtrar os resultados onde o EV é positivo
-novo_df = novo_df[novo_df['Responsabilidade'] >0 ]
-
-novo_df = novo_df.reset_index(drop=True)
-novo_df.index += 1
+# Verificar se a aposta tem EV+ usando o critério de Kelly
+novo_df['EV_Kelly'] = novo_df['Tamanho_Stake_Kelly'] > 0
 
 # Exibição do resultado final
-st.write('Resultados com tamanhos de responsabilidade usando o critério de Kelly:')
-st.write(novo_df[['Placar','Count', 'Probability', 'Odd_Justa', 'Odd_Mercado', 'Responsabilidade', 'Tamanho_Stake', 'Lucro_Potencial']])
+st.write('Resultados com tamanhos de stake para alcançar a responsabilidade desejada e critério de Kelly:')
+st.write(novo_df[['Placar','Count', 'Probability', 'Odd_Justa', 'Odd_Mercado', 'Tamanho_Stake',
+                  'Lucro_Potencial', 'Tamanho_Stake_Kelly', 'EV_Kelly']])
