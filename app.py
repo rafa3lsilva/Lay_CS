@@ -1,3 +1,4 @@
+from msilib.schema import Icon
 import pandas as pd
 import numpy as np
 from scipy.stats import poisson
@@ -31,11 +32,13 @@ def top_results_df(simulated_results, top_n):
     return result_counts
 
 st.set_page_config(
-    page_title="Apostas Lay para os Resultados Selecionados",
+    page_title="CS Statistic",
     page_icon=":soccer:",
     layout="wide",
     initial_sidebar_state="expanded",
 )
+
+st.sidebar.title('CS Statistic')
 
 dia = st.sidebar.date_input("Selecione a data:", value=datetime.date.today(), key='date_input')
 st.markdown("""<style>
@@ -77,11 +80,17 @@ base_A = base[['Away','Media_GM_A','Media_GS_A']]
 Jogos_do_Dia['Jogo'] = Jogos_do_Dia['Home'] + ' x ' + Jogos_do_Dia['Away']
 lista_confrontos = Jogos_do_Dia['Jogo'].tolist()
 
-st.header('Método de Lay CS')
-st.text('Simulação de Poisson')
-st.sidebar.title('Selecione a Partida')
-wid_filtro = st.sidebar.selectbox('Escolha o Jogo:', Jogos_do_Dia['Jogo'].unique(), index=0)
-df_filtrado = Jogos_do_Dia[Jogos_do_Dia['Jogo'] == wid_filtro]
+st.title('CS Statistic')
+
+# Selecione Horario e jogo
+
+wid_filtro = st.sidebar.selectbox('Selecione o Horario:', Jogos_do_Dia['Time'].unique(), index=0)
+df_Hora = Jogos_do_Dia[Jogos_do_Dia['Time'] == wid_filtro]
+df_Hora = df_Hora[['League','Date','Time','Home','Away','Odd_H','Odd_D','Odd_A','Jogo']]
+df_Hora = drop_reset_index(df_Hora)
+
+wid_filtro = st.sidebar.selectbox('Escolha o Jogo:', df_Hora['Jogo'].unique(), index=0)
+df_filtrado = df_Hora[df_Hora['Jogo'] == wid_filtro]
 df_filtrado = df_filtrado[['League','Date','Time','Home','Away','Odd_H','Odd_D','Odd_A']]
 df_filtrado = drop_reset_index(df_filtrado)
 st.write('**Jogo Selecionado:**')
@@ -161,27 +170,27 @@ st.write(last_away_games)
 novo_df = results_filtrado.copy()
 
 # Adição do input para responsabilidade desejada
-responsabilidade_desejada = st.sidebar.number_input("Responsabilidade Desejada:", min_value=0.0, step=1.0)
+responsabilidade_desejada = st.sidebar.number_input("Responsabilidade:", min_value=0.0, step=1.0)
 
 # Adição das odds de mercado ao novo_df
 odds_mercado = []
 for index, row in novo_df.iterrows():
-    odd_mercado = st.sidebar.number_input(f"Odd de mercado para '{row['Placar']}':", min_value=1.01, step=0.01)
+    odd_mercado = st.sidebar.number_input(f"Odd Lay '{row['Placar']}':", min_value=1.01, step=0.01)
     odds_mercado.append(odd_mercado)
 
 # Adição das odds de mercado ao novo_df
-novo_df['Odd_Mercado'] = odds_mercado
+novo_df['Odd_Lay'] = odds_mercado
 
 # Função para calcular o tamanho da stake com base na responsabilidade desejada
 def calcular_tamanho_stake(responsabilidade, odd_justa, odd_mercado):
     return responsabilidade / (odd_mercado - 1)
 
 # Aplicação do cálculo do tamanho da stake
-novo_df['Tamanho_Stake'] = calcular_tamanho_stake(responsabilidade_desejada, novo_df['Odd_Justa'], novo_df['Odd_Mercado'])
+novo_df['Stake'] = calcular_tamanho_stake(responsabilidade_desejada, novo_df['Odd_Justa'], novo_df['Odd_Lay'])
 
 # Cálculo do lucro potencial
 comissao = 5.6 / 100  # Comissão de 5.6%
-novo_df['Lucro_Potencial'] = novo_df['Tamanho_Stake'] * (1 - comissao)
+novo_df['Lucro_Potencial'] = novo_df['Stake'] * (1 - comissao)
 
 # Função para calcular o tamanho da stake com base no critério de Kelly
 def calcular_tamanho_stake_kelly(probabilidade, odd_justa, odd_mercado):
@@ -191,18 +200,18 @@ def calcular_tamanho_stake_kelly(probabilidade, odd_justa, odd_mercado):
     else:
         return 0  # Se a odd de mercado for maior ou igual à odd justa, não há aposta de valor
 
-# Aplicação do cálculo do tamanho da stake de acordo com o critério de Kelly
-novo_df['Tamanho_Stake_Kelly'] = novo_df.apply(lambda row: calcular_tamanho_stake_kelly(row['Probability'], row['Odd_Justa'], row['Odd_Mercado']), axis=1)
+# Aplicação do cálculo do tamanho da stake de acordo com o critério de Kellydd
+novo_df['Stake_Kelly'] = novo_df.apply(lambda row: calcular_tamanho_stake_kelly(row['Probability'], row['Odd_Justa'], row['Odd_Lay']), axis=1)
 
 # Arredondar Tamanho_Stake, Lucro_Potencial e Tamanho_Stake_Kelly para duas casas decimais
-novo_df['Tamanho_Stake'] = novo_df['Tamanho_Stake'].round(2)
+novo_df['Stake'] = novo_df['Stake'].round(2)
 novo_df['Lucro_Potencial'] = novo_df['Lucro_Potencial'].round(2)
-novo_df['Tamanho_Stake_Kelly'] = novo_df['Tamanho_Stake_Kelly'].round(2)
+novo_df['take_Kelly'] = novo_df['Stake_Kelly'].round(2)
 
 # Verificar se a aposta tem EV+ usando o critério de Kelly
-novo_df['EV_Kelly'] = novo_df['Tamanho_Stake_Kelly'] > 0
+novo_df['EV_Kelly'] = novo_df['Stake_Kelly'] > 0
 
 # Exibição do resultado final
 st.write('Resultados com tamanhos de stake para alcançar a responsabilidade desejada e critério de Kelly:')
-st.write(novo_df[['Placar','Count', 'Probability', 'Odd_Justa', 'Odd_Mercado', 'Tamanho_Stake',
-                  'Lucro_Potencial', 'Tamanho_Stake_Kelly', 'EV_Kelly']])
+st.write(novo_df[['Placar','Count', 'Probability', 'Odd_Justa', 'Odd_Lay', 'Stake',
+                  'Lucro_Potencial', 'Stake_Kelly', 'EV_Kelly']])
