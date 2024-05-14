@@ -2,6 +2,7 @@ import pandas as pd
 import numpy as np
 from scipy.stats import poisson
 import streamlit as st
+import matplotlib.pyplot as plt
 import datetime
 
 
@@ -87,8 +88,6 @@ df_filtrado = drop_reset_index(df_filtrado)
 st.write('**Jogo Selecionado:**')
 st.write(df_filtrado)
 
-st.write('Resultados da Analise')
-
 # Variáveis globais para armazenar as informações do jogo selecionado
 
 Team_01 = df_filtrado['Home'].iloc[0]
@@ -104,13 +103,32 @@ simulated_results = simulate_match(Media_GM_H, Media_GS_H, Media_GM_A, Media_GS_
 results = top_results_df(simulated_results, 10000)
 
 # Defina a probabilidade máxima desejada
-probabilidade_maxima = 0.08  
+probabilidade_maxima = 0.08 
 
 # Filtrar os resultados com probabilidade igual ou inferior a 8%
 results_filtrado = results[results['Probability'] < probabilidade_maxima]
 
-# Adicionar a coluna 'Placar' com o formato 'Home_Goals x Away_Goals'
-results_filtrado['Placar'] = results_filtrado.apply(lambda row: f"{int(row['Home_Goals'])}x{int(row['Away_Goals'])}", axis=1)
+def format_score(row):
+    home_goals = int(row['Home_Goals'])
+    away_goals = int(row['Away_Goals'])
+
+    # Verificar se é uma goleada para o time da casa
+    if home_goals > 3 and home_goals > away_goals:
+        return 'Goleada_H'
+    
+    # Verificar se é uma goleada para o time visitante
+    elif away_goals > 3 and away_goals > home_goals:
+        return 'Goleada_A'
+    
+    # Verificar se é um empate com muitos gols
+    elif home_goals >= 4 and away_goals >= 4 and home_goals == away_goals:
+        return 'Outro_D'
+
+    # Se não for nenhuma das condições acima, retornar o placar normal
+    else:
+        return f"{home_goals}x{away_goals}"
+
+results_filtrado['Placar'] = results_filtrado.apply(format_score, axis=1)
 
 # Calcular e adicionar a coluna 'Odd_Justa' com a odd justa para cada placar
 results_filtrado['Odd_Justa'] = 1 / results_filtrado['Probability']
@@ -126,80 +144,62 @@ results_filtrado = results_filtrado.head(5)
 results_filtrado = results_filtrado.reset_index(drop=True)
 results_filtrado.index += 1
 
-
 # Exibir os resultados filtrados
-st.write(results_filtrado)
+last_home_games = base[base['Home'] == df_filtrado['Home'].iloc[0]].tail(5).reset_index(drop=True)
+last_home_games.index += 1
+last_away_games = base[base['Away'] == df_filtrado['Away'].iloc[0]].tail(5).reset_index(drop=True)
+last_away_games.index += 1
+
+st.write('**Últimos 5 jogos do time da casa:**')
+st.write(last_home_games)
+
+st.write('**Últimos 5 jogos do time visitante:**')
+st.write(last_away_games)
 
 # Cabeçalho da seção
-# st.subheader('Apostas Lay para os Resultados Selecionados')
 
-# Defina a responsabilidade total
-responsabilidade_total = st.sidebar.number_input("Responsabilidade:", min_value=1.01, step=0.01)
+# Criação do DataFrame novo_df com base no results_filtrado
+novo_df = results_filtrado.copy()
 
-# Defina a comissão
-comissao = 5.6 / 100  # 5.6% de comissão
+# Adição dos inputs para tamanho da banca e porcentagem a ser arriscada
+tamanho_banca_usuario = st.sidebar.number_input("Tamanho da Banca:", min_value=1.0, step=1.0)
+percentual_banca = st.sidebar.number_input("Percentual da Banca a Arriscar (%):", min_value=1.0, max_value=100.0, step=0.5) / 100
 
-# Lista para armazenar as odds de mercado
+# Adição dos inputs para odds de mercado
 odds_mercado = []
-
-# Loop sobre cada placar para coletar as odds de mercado
-for placar in results_filtrado['Placar']:
-    odd_mercado = st.sidebar.number_input(f"Odd de mercado para '{placar}':", min_value=1.01, step=0.01)
+for index, row in novo_df.iterrows():
+    odd_mercado = st.sidebar.number_input(f"Odd de mercado para '{row['Placar']}':", min_value=1.01, step=0.01)
     odds_mercado.append(odd_mercado)
 
-# Adicione as odds de mercado ao DataFrame
-results_filtrado['Odd_Mercado'] = odds_mercado
+# Adição das odds de mercado ao novo_df
+novo_df['Odd_Mercado'] = odds_mercado
 
-# Calcular a stake para cada placar com base na responsabilidade total
-stakes = [responsabilidade_total / (odd - 1) for odd in odds_mercado]
-results_filtrado['Stake'] = stakes
+# Função para calcular a responsabilidade usando o critério de Kelly
+def calcular_responsabilidade_kelly(probabilidade, odd_justa, odd_mercado, tamanho_banca):
+    ev = (odd_justa / odd_mercado - 1)
+    return ev * tamanho_banca * probabilidade
 
-# Arredondar a stake para duas casas decimais
-results_filtrado['Stake'] = results_filtrado['Stake'].round(2)
+# Aplicação do critério de Kelly para calcular a responsabilidade
+novo_df['Responsabilidade'] = calcular_responsabilidade_kelly(novo_df['Probability'], novo_df['Odd_Justa'], novo_df['Odd_Mercado'], tamanho_banca_usuario)
 
-# Calcular o lucro potencial para cada placar
-lucros_potenciais = [stake * (1 - comissao) for stake in stakes]
-results_filtrado['Lucro_Potencial'] = lucros_potenciais
+# Cálculo do tamanho da stake
+novo_df['Tamanho_Stake'] = novo_df['Responsabilidade'] / (novo_df['Odd_Mercado'] - 1)
 
-# Arredondar o lucro potencial para duas casas decimais
-results_filtrado['Lucro_Potencial'] = results_filtrado['Lucro_Potencial'].round(2)
+# Cálculo do lucro potencial
+comissao = 5.6 / 100  # Comissão de 5.6%
+novo_df['Lucro_Potencial'] = novo_df['Tamanho_Stake'] * (1 - comissao)
 
-# % de lucro sobre a responsabilidade
-porcentagem_lucro = [lucros_potenciais / responsabilidade_total * 100 for lucros_potenciais in lucros_potenciais]
-results_filtrado['%Lucro'] = porcentagem_lucro
-
-# Arredondar o lucro potencial para duas casas decimais
-results_filtrado['%Lucro'] = results_filtrado['%Lucro'].round(2)
-
-# Calcular o EV para cada placar comparando a odd de mercado com a odd justa
-ev = []
-for index, row in results_filtrado.iterrows():
-    ev_placar = (1 - comissao) * (row['Odd_Justa'] - 1) - (1 - comissao) * (row['Odd_Mercado'] - 1)
-    ev.append(ev_placar)
-
-# Arredondar a odd justa para duas casas decimais
-results_filtrado['Odd_Justa'] = results_filtrado['Odd_Justa'].round(2)
-
-results_filtrado['EV'] = ev
-
-# Verificar se o EV é positivo
-results_filtrado['EV+'] = results_filtrado['EV'] > 0
-
-# Arredondar o EV para duas casas decimais
-results_filtrado['EV'] = results_filtrado['EV'].round(2)
-
+# Arredondar Responsabilidade, Tamanho_Stake, Lucro_Potencial para duas casas decimais
+novo_df['Responsabilidade'] = novo_df['Responsabilidade'].round(2)
+novo_df['Tamanho_Stake'] = novo_df['Tamanho_Stake'].round(2)
+novo_df['Lucro_Potencial'] = novo_df['Lucro_Potencial'].round(2)
 
 # Filtrar os resultados onde o EV é positivo
-results_filtrado_ev_positivo = results_filtrado[results_filtrado['EV+']]
+novo_df = novo_df[novo_df['Responsabilidade'] >0 ]
 
-results_filtrado_ev_positivo = results_filtrado_ev_positivo.reset_index(drop=True)
-results_filtrado_ev_positivo.index += 1
+novo_df = novo_df.reset_index(drop=True)
+novo_df.index += 1
 
-# Exibir os resultados
-st.write('Resultados com EV positivo:')
-st.write(results_filtrado_ev_positivo)
-
-# Calcular o EV médio
-EV_medio = results_filtrado_ev_positivo['EV'].mean()
-st.write(f'EV médio: {round(EV_medio, 2)}')
-
+# Exibição do resultado final
+st.write('Resultados com tamanhos de responsabilidade usando o critério de Kelly:')
+st.write(novo_df[['Placar','Count', 'Probability', 'Odd_Justa', 'Odd_Mercado', 'Responsabilidade', 'Tamanho_Stake', 'Lucro_Potencial']])
