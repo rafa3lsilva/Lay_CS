@@ -2,7 +2,6 @@ import pandas as pd
 import numpy as np
 from scipy.stats import poisson
 import streamlit as st
-import matplotlib.pyplot as plt
 import datetime
 
 
