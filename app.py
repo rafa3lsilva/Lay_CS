@@ -43,7 +43,7 @@ st.sidebar.title('CS Statistic')
 dia = st.sidebar.date_input("Selecione a data:", value=datetime.date.today(), key='date_input')
 st.markdown("""<style>
     div[data-testid="stDateInput"] > div:first-child {
-        width: 40px;
+        width: 50px;
     }
 </style>""", unsafe_allow_html=True)
 
