@@ -1,10 +1,8 @@
-from msilib.schema import Icon
 import pandas as pd
 import numpy as np
 from scipy.stats import poisson
 import streamlit as st
 import datetime
-from msilib.schema import Icon
 
 
 def drop_reset_index(df):
@@ -207,7 +205,7 @@ novo_df['Stake_Kelly'] = novo_df.apply(lambda row: calcular_tamanho_stake_kelly(
 # Arredondar Tamanho_Stake, Lucro_Potencial e Tamanho_Stake_Kelly para duas casas decimais
 novo_df['Stake'] = novo_df['Stake'].round(2)
 novo_df['Lucro_Potencial'] = novo_df['Lucro_Potencial'].round(2)
-novo_df['take_Kelly'] = novo_df['Stake_Kelly'].round(2)
+novo_df['Stake_Kelly'] = novo_df['Stake_Kelly'].round(2)
 
 # Verificar se a aposta tem EV+ usando o critério de Kelly
 novo_df['EV_Kelly'] = novo_df['Stake_Kelly'] > 0
