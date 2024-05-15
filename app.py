@@ -4,6 +4,7 @@ import numpy as np
 from scipy.stats import poisson
 import streamlit as st
 import datetime
+from msilib.schema import Icon
 
 
 def drop_reset_index(df):
