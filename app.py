@@ -81,7 +81,10 @@ def carregar_dados(url):
         else:
             st.error(f'Erro ao carregar dados: {e}')
         return None
-
+    except Exception as e:
+        st.error(f'Erro inesperado: {e}')
+        return None
+        
 # Função para Configurar a pagina
 st.set_page_config(
     page_title="CS Statistic",
