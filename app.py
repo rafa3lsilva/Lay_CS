@@ -110,26 +110,19 @@ st.markdown("""<style>
 st.title('CS Statistic')
 
 # Dicionrio das Ligas
-leagues = ['ARGENTINA - LIGA PROFESIONAL', 'ARGENTINA - COPA DE LA LIGA PROFESIONAL',
-           'ARMENIA - PREMIER LEAGUE', 'AUSTRALIA - A-LEAGUE', 'AUSTRIA - 2. LIGA', 'AUSTRIA - BUNDESLIGA',
-           'BELGIUM - CHALLENGER PRO LEAGUE', 'BELGIUM - JUPILER PRO LEAGUE', 'BOSNIA AND HERZEGOVINA - PREMIJER LIGA BIH',
-           'BRAZIL - COPA DO BRASIL', 'BRAZIL - SERIE A', 'BRAZIL - SERIE B', 'BULGARIA - PARVA LIGA',
-           'CHINA - SUPER LEAGUE', 'CROATIA - HNL', 'CROATIA - PRVA NL', 'CZECH REPUBLIC - FORTUNA:LIGA',
-           'DENMARK - 1ST DIVISION', 'DENMARK - SUPERLIGA', 'EGYPT - PREMIER LEAGUE', 'ENGLAND - CHAMPIONSHIP',
-           'ENGLAND - LEAGUE ONE', 'ENGLAND - LEAGUE TWO', 'ENGLAND - NATIONAL LEAGUE', 'ENGLAND - PREMIER LEAGUE',
-           'ESTONIA - ESILIIGA', 'ESTONIA - MEISTRILIIGA', 'EUROPE - CHAMPIONS LEAGUE', 'EUROPE - EUROPA CONFERENCE LEAGUE',
-           'EUROPE - EUROPA LEAGUE', 'FINLAND - VEIKKAUSLIIGA', 'FINLAND - YKKONEN', 'FRANCE - LIGUE 1', 'FRANCE - LIGUE 2',
-           'FRANCE - NATIONAL', 'GERMANY - 2. BUNDESLIGA', 'GERMANY - 3. LIGA', 'GERMANY - BUNDESLIGA',
-           'HUNGARY - OTP BANK LIGA', 'ICELAND - BESTA DEILD KARLA', 'IRELAND - PREMIER DIVISION', 'ITALY - SERIE A',
-           'ITALY - SERIE B', 'JAPAN - J1 LEAGUE', 'JAPAN - J2 LEAGUE', 'MEXICO - LIGA DE EXPANSION MX', 'MEXICO - LIGA MX',
-           'NETHERLANDS - EERSTE DIVISIE', 'NETHERLANDS - EREDIVISIE', 'NORWAY - ELITESERIEN', 'NORWAY - OBOS-LIGAEN',
-           'POLAND - EKSTRAKLASA', 'PORTUGAL - LIGA PORTUGAL', 'PORTUGAL - LIGA PORTUGAL 2', 'ROMANIA - LIGA 1',
-           'SAUDI ARABIA - SAUDI PROFESSIONAL LEAGUE', 'SCOTLAND - CHAMPIONSHIP', 'SCOTLAND - LEAGUE ONE', 'SCOTLAND - LEAGUE TWO',
-           'SCOTLAND - PREMIERSHIP', 'SERBIA - SUPER LIGA', 'SLOVAKIA - NIKE LIGA', 'SLOVENIA - PRVA LIGA',
-           'SOUTH AMERICA - COPA LIBERTADORES', 'SOUTH AMERICA - COPA SUDAMERICANA', 'SOUTH KOREA - K LEAGUE 1',
-           'SOUTH KOREA - K LEAGUE 2', 'SPAIN - LALIGA', 'SPAIN - LALIGA2', 'SWEDEN - ALLSVENSKAN', 'SWEDEN - SUPERETTAN',
-           'SWITZERLAND - CHALLENGE LEAGUE', 'SWITZERLAND - SUPER LEAGUE', 'TURKEY - 1. LIG', 'TURKEY - SUPER LIG',
-           'UKRAINE - PREMIER LEAGUE', 'USA - MLS', 'WALES - CYMRU PREMIER']
+leagues = ['ARGENTINA - COPA DE LA LIGA PROFESIONAL', 'ARGENTINA - LIGA PROFESIONAL', 'ARMENIA - PREMIER LEAGUE',
+           'AUSTRALIA - A-LEAGUE', 'AUSTRIA - BUNDESLIGA', 'BELGIUM - CHALLENGER PRO LEAGUE', 'BELGIUM - JUPILER PRO LEAGUE',
+           'BOLIVIA - DIVISION PROFESIONAL', 'BRAZIL - SERIE A', 'BRAZIL - SERIE B', 'BULGARIA - PARVA LIGA', 'CHILE - PRIMERA DIVISION',
+           'CHINA - SUPER LEAGUE', 'COLOMBIA - PRIMERA A', 'CROATIA - HNL', 'CZECH REPUBLIC - FORTUNA:LIGA', 'DENMARK - SUPERLIGA',
+           'EGYPT - PREMIER LEAGUE', 'ENGLAND - CHAMPIONSHIP', 'ENGLAND - LEAGUE ONE', 'ENGLAND - LEAGUE TWO', 'ENGLAND - PREMIER LEAGUE',
+           'ESTONIA - MEISTRILIIGA', 'FINLAND - VEIKKAUSLIIGA', 'FRANCE - LIGUE 1', 'FRANCE - LIGUE 2', 'GERMANY - 2. BUNDESLIGA',
+           'GERMANY - 3. LIGA', 'GERMANY - BUNDESLIGA', 'GREECE - SUPER LEAGUE', 'HUNGARY - OTP BANK LIGA', 'ITALY - SERIE A', 'ITALY - SERIE B',
+           'JAPAN - J1 LEAGUE', 'MEXICO - LIGA MX', 'NETHERLANDS - EREDIVISIE', 'NORWAY - ELITESERIEN', 'PERU - LIGA 1', 'POLAND - EKSTRAKLASA',
+           'PORTUGAL - LIGA PORTUGAL', 'PORTUGAL - LIGA PORTUGAL 2', 'ROMANIA - LIGA 1', 'SAUDI ARABIA - SAUDI PROFESSIONAL LEAGUE',
+           'SCOTLAND - CHAMPIONSHIP', 'SCOTLAND - LEAGUE ONE', 'SCOTLAND - PREMIERSHIP', 'SERBIA - SUPER LIGA', 'SLOVAKIA - NIKE LIGA',
+           'SLOVENIA - PRVA LIGA', 'SOUTH KOREA - K LEAGUE 1', 'SPAIN - LALIGA', 'SPAIN - LALIGA2', 'SWEDEN - ALLSVENSKAN',
+           'SWITZERLAND - SUPER LEAGUE', 'TURKEY - SUPER LIG', 'UKRAINE - PREMIER LEAGUE', 'URUGUAY - PRIMERA DIVISION', 'USA - MLS',
+           'VENEZUELA - LIGA FUTVE', 'WALES - CYMRU PREMIER']
 
 # URL do arquivo CSV que você deseja carregar
 url = (
@@ -140,16 +133,16 @@ jogos_do_dia = carregar_dados(url)
 
 # Verificar se os dados foram carregados com sucesso
 if jogos_do_dia is not None:
-    jogos_do_dia = jogos_do_dia[['League', 'Date',
+    jogos_do_dia = jogos_do_dia[['League', 'Round', 'Date',
                                 'Time', 'Home', 'Away', 'Odd_H', 'Odd_D', 'Odd_A']]
-    jogos_do_dia.columns = ['League', 'Date', 'Time',
+    jogos_do_dia.columns = ['League', 'Round', 'Date', 'Time',
                             'Home', 'Away', 'Odd_H', 'Odd_D', 'Odd_A']
     Jogos_do_Dia = jogos_do_dia[jogos_do_dia['League'].isin(leagues) == True]
     Jogos_do_Dia = drop_reset_index(Jogos_do_Dia)
 
     Jogos = Jogos_do_Dia.sort_values(by='League')
     ligas = Jogos['League'].unique()
-
+    
     # Importando a Base de Dados
     base = pd.read_csv(
         "https://github.com/futpythontrader/YouTube/blob/main/Bases_de_Dados/FlashScore/Base_de_Dados_FlashScore_v2.csv?raw=true")
@@ -199,21 +192,21 @@ if jogos_do_dia is not None:
     wid_filtro = st.sidebar.selectbox(
         'Selecione o Horario:', Jogos_do_Dia['Time'].unique(), index=0)
     df_Hora = Jogos_do_Dia[Jogos_do_Dia['Time'] == wid_filtro]
-    df_Hora = df_Hora[['League', 'Date', 'Time', 'Home',
+    df_Hora = df_Hora[['League', 'Round', 'Date', 'Time', 'Home',
                        'Away', 'Odd_H', 'Odd_D', 'Odd_A', 'Jogo']]
 
     # Seleção da Liga com base o horario
     wid_filtro = st.sidebar.selectbox(
         'Selecione a Liga:', df_Hora['League'].unique(), index=0)
     df_Liga = df_Hora[df_Hora['League'] == wid_filtro]
-    df_Liga = df_Liga[['League', 'Date', 'Time', 'Home',
+    df_Liga = df_Liga[['League', 'Round', 'Date', 'Time', 'Home',
                        'Away', 'Odd_H', 'Odd_D', 'Odd_A', 'Jogo']]
 
     # Seleção do jogo com base na liga
     wid_filtro = st.sidebar.selectbox(
         'Escolha o Jogo:', df_Liga['Jogo'].unique(), index=0)
     df_filtrado = df_Liga[df_Liga['Jogo'] == wid_filtro]
-    df_filtrado = df_filtrado[['League', 'Date', 'Time',
+    df_filtrado = df_filtrado[['League', 'Round', 'Date', 'Time',
                                'Home', 'Away', 'Odd_H', 'Odd_D', 'Odd_A']]
 
     # Resentando o index do filtro
@@ -283,37 +276,80 @@ if jogos_do_dia is not None:
         results_filtrado = results_filtrado.reset_index(drop=True)
         results_filtrado.index += 1
 
-        # Verifica se base e df_filtrado não estão vazios para mostrar os ultimos 5 jogos home e away
+       # Verifica se base e df_filtrado não estão vazios para mostrar os últimos 5 jogos home e away
         if not base.empty and not df_filtrado.empty:
             # Verifica se há pelo menos um valor em 'Home' e 'Away' em df_filtrado
             if len(df_filtrado) > 0 and 'Home' in df_filtrado.columns and 'Away' in df_filtrado.columns:
+                home_team = df_filtrado['Home'].iloc[0]
+                away_team = df_filtrado['Away'].iloc[0]
+
                 # Seleciona os últimos 5 jogos em casa para o time específico
-                last_home_games = base[base['Home'] ==
-                                       df_filtrado['Home'].iloc[0]].tail(5)
+                last_home_games = base[base['Home'] == home_team].tail(5)
 
                 # Seleciona os últimos 5 jogos fora para o time específico
-                last_away_games = base[base['Away'] ==
-                                       df_filtrado['Away'].iloc[0]].tail(5)
+                last_away_games = base[base['Away'] == away_team].tail(5)
+
+                # Filtrar os confrontos diretos (H2H) apenas quando o time da casa jogou em casa contra o time visitante
+                h2h_home_games = base[(base['Home'] == home_team) & (
+                    base['Away'] == away_team)].tail(5)
+                h2h_away_games = base[(base['Home'] == away_team) & (
+                    base['Away'] == home_team)].tail(5)
+
+                # Verifica se há confrontos diretos suficientes
+                if len(h2h_home_games) > 0:
+                    h2h_home_games = h2h_home_games.sort_values(
+                        by='Date', ascending=False).reset_index(drop=True)
+                    h2h_home_games.index += 1
+                else:
+                    h2h_home_games = None
+
+                if len(h2h_away_games) > 0:
+                    h2h_away_games = h2h_away_games.sort_values(
+                        by='Date', ascending=False).reset_index(drop=True)
+                    h2h_away_games.index += 1
+                else:
+                    h2h_away_games = None
+
             else:
-                print("Home e/ou Away com jogos inferior a 5.")
+                last_home_games = None
+                last_away_games = None
+                h2h_home_games = None
+                h2h_away_games = None
+                st.write("Home e/ou Away com jogos inferior a 5.")
         else:
-            print("Home e/ou Away com jogos inferior a 5.")
+            last_home_games = None
+            last_away_games = None
+            h2h_home_games = None
+            h2h_away_games = None
+            st.write("Base ou df_filtrado estão vazios.")
 
-        # Classificar em ordem decrescente os ultimos 5 jogos home e away
-        last_home_games = last_home_games.sort_values(
-            by='Date', ascending=False).reset_index(drop=True)
-        last_home_games.index += 1
+        # Classificar em ordem decrescente os últimos 5 jogos home e away
+        if last_home_games is not None:
+            last_home_games = last_home_games.sort_values(
+                by='Date', ascending=False).reset_index(drop=True)
+            last_home_games.index += 1
 
-        last_away_games = last_away_games.sort_values(
-            by='Date', ascending=False).reset_index(drop=True)
-        last_away_games.index += 1
+        if last_away_games is not None:
+            last_away_games = last_away_games.sort_values(
+                by='Date', ascending=False).reset_index(drop=True)
+            last_away_games.index += 1
 
-        # Exibindo os ultimos 5 jogos home e away
-        st.write('**Últimos 5 jogos do time da casa:**')
-        st.write(last_home_games)
+        # Exibindo os últimos 5 jogos home e away
+        if last_home_games is not None:
+            st.write('**Últimos 5 jogos do time da casa:**')
+            st.write(last_home_games)
 
-        st.write('**Últimos 5 jogos do time visitante:**')
-        st.write(last_away_games)
+        if last_away_games is not None:
+            st.write('**Últimos 5 jogos do time visitante:**')
+            st.write(last_away_games)
+
+        # Exibir os últimos confrontos diretos (H2H)
+        if h2h_home_games is not None:
+            st.write('**Últimos confrontos diretos (H2H):**')
+            st.write(h2h_home_games)
+        else:
+            st.write(
+                "Nenhum confronto direto (H2H) encontrado no estádio do time da casa.")
 
         # Cabeçalho da seção
         # Criação do DataFrame novo_df com base no results_filtrado
@@ -407,6 +443,33 @@ if jogos_do_dia is not None:
             st.write(f'EV médio: {round(EV_medio, 2)}')
         else:
             st.write('EV médio: Não aplicável')
+
+        # Usando HTML e CSS para criar botões alinhados horizontalmente
+        st.markdown(
+            """
+            <style>
+            .button-container {
+                display: flex;
+                gap: 10px;
+            }
+            .button-container a {
+                text-decoration: none;
+                padding: 8px 16px;
+                background-color: #010F1A;
+                color: white;
+                border-radius: 4px;
+            }
+            .button-container a:hover {
+                background-color: #113954;
+            }
+            </style>
+            <div class="button-container">
+                <a href="https://bolsadeaposta.com/" target="_blank">Bolsa de Aposta</a>
+                <a href="https://fulltbet.com/" target="_blank">FullTBet</a>
+            </div>
+            """,
+            unsafe_allow_html=True
+        )
 
     except KeyError as e:
         st.write(
