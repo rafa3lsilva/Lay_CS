@@ -111,18 +111,29 @@ st.title('CS Statistic')
 
 # Dicionrio das Ligas
 leagues = ['ARGENTINA - COPA DE LA LIGA PROFESIONAL', 'ARGENTINA - LIGA PROFESIONAL', 'ARMENIA - PREMIER LEAGUE',
-           'AUSTRALIA - A-LEAGUE', 'AUSTRIA - BUNDESLIGA', 'BELGIUM - CHALLENGER PRO LEAGUE', 'BELGIUM - JUPILER PRO LEAGUE',
-           'BOLIVIA - DIVISION PROFESIONAL', 'BRAZIL - SERIE A', 'BRAZIL - SERIE B', 'BULGARIA - PARVA LIGA', 'CHILE - PRIMERA DIVISION',
-           'CHINA - SUPER LEAGUE', 'COLOMBIA - PRIMERA A', 'CROATIA - HNL', 'CZECH REPUBLIC - FORTUNA:LIGA', 'DENMARK - SUPERLIGA',
-           'EGYPT - PREMIER LEAGUE', 'ENGLAND - CHAMPIONSHIP', 'ENGLAND - LEAGUE ONE', 'ENGLAND - LEAGUE TWO', 'ENGLAND - PREMIER LEAGUE',
-           'ESTONIA - MEISTRILIIGA', 'FINLAND - VEIKKAUSLIIGA', 'FRANCE - LIGUE 1', 'FRANCE - LIGUE 2', 'GERMANY - 2. BUNDESLIGA',
-           'GERMANY - 3. LIGA', 'GERMANY - BUNDESLIGA', 'GREECE - SUPER LEAGUE', 'HUNGARY - OTP BANK LIGA', 'ITALY - SERIE A', 'ITALY - SERIE B',
-           'JAPAN - J1 LEAGUE', 'MEXICO - LIGA MX', 'NETHERLANDS - EREDIVISIE', 'NORWAY - ELITESERIEN', 'PERU - LIGA 1', 'POLAND - EKSTRAKLASA',
-           'PORTUGAL - LIGA PORTUGAL', 'PORTUGAL - LIGA PORTUGAL 2', 'ROMANIA - LIGA 1', 'SAUDI ARABIA - SAUDI PROFESSIONAL LEAGUE',
-           'SCOTLAND - CHAMPIONSHIP', 'SCOTLAND - LEAGUE ONE', 'SCOTLAND - PREMIERSHIP', 'SERBIA - SUPER LIGA', 'SLOVAKIA - NIKE LIGA',
-           'SLOVENIA - PRVA LIGA', 'SOUTH KOREA - K LEAGUE 1', 'SPAIN - LALIGA', 'SPAIN - LALIGA2', 'SWEDEN - ALLSVENSKAN',
-           'SWITZERLAND - SUPER LEAGUE', 'TURKEY - SUPER LIG', 'UKRAINE - PREMIER LEAGUE', 'URUGUAY - PRIMERA DIVISION', 'USA - MLS',
-           'VENEZUELA - LIGA FUTVE', 'WALES - CYMRU PREMIER']
+           'AUSTRALIA - A-LEAGUE', 'AUSTRIA - BUNDESLIGA', 'AUSTRIA - 2. LIGA', 'BELGIUM - CHALLENGER PRO LEAGUE',
+           'BELGIUM - JUPILER PRO LEAGUE', 'BOLIVIA - DIVISION PROFESIONAL', 'BRAZIL - SERIE A', 'BRAZIL - SERIE B',
+           'BRAZIL - SERIE C', 'BRAZIL - SERIE D', 'BULGARIA - PARVA LIGA', 'CHILE - PRIMERA DIVISION',
+           'CHINA - SUPER LEAGUE', 'COLOMBIA - PRIMERA A', 'CROATIA - HNL', 'CROATIA - PRVA NL', 'CYPRUS - CYTA CHAMPIONSHIP',
+           'CZECH REPUBLIC - FORTUNA:LIGA', 'DENMARK - SUPERLIGA', 'DENMARK - 1ST DIVISION', 'ECUADOR - LIGA PRO',
+           'EGYPT - PREMIER LEAGUE', 'ENGLAND - CHAMPIONSHIP', 'ENGLAND - LEAGUE ONE', 'ENGLAND - LEAGUE TWO',
+           'ENGLAND - NATIONAL LEAGUE', 'ENGLAND - PREMIER LEAGUE', 'ESTONIA - ESILIIGA', 'ESTONIA - MEISTRILIIGA',
+           'EUROPE - CHAMPIONS LEAGUE', 'EUROPE - EUROPA CONFERENCE LEAGUE', 'EUROPE - EUROPA LEAGUE',
+           'FINLAND - VEIKKAUSLIIGA', 'FINLAND - YKKONEN', 'FRANCE - LIGUE 1', 'FRANCE - LIGUE 2', 'GERMANY - 2. BUNDESLIGA',
+           'GERMANY - 3. LIGA', 'GERMANY - BUNDESLIGA', 'GREECE - SUPER LEAGUE', 'HUNGARY - OTP BANK LIGA',
+           'ICELAND - BESTA DEILD KARLA', 'IRELAND - PREMIER DIVISION', 'ISRAEL - LIGAT HA\'AL', 'ITALY - SERIE A',
+           'ITALY - SERIE B', 'JAPAN - J1 LEAGUE', 'JAPAN - J2 LEAGUE', 'MEXICO - LIGA MX', 'NETHERLANDS - EERSTE DIVISIE',
+           'NETHERLANDS - EREDIVISIE', 'NORTHERN IRELAND - NIFL PREMIERSHIP', 'NORWAY - ELITESERIEN', 'NORWAY - OBOS-LIGAEN',
+           'PARAGUAY - PRIMERA DIVISION', 'PERU - LIGA 1', 'POLAND - DIVISION 1', 'POLAND - EKSTRAKLASA',
+           'PORTUGAL - LIGA PORTUGAL', 'PORTUGAL - LIGA PORTUGAL 2', 'ROMANIA - LIGA 1', 'ROMANIA - LIGA 2',
+           'SAUDI ARABIA - SAUDI PROFESSIONAL LEAGUE', 'SCOTLAND - CHAMPIONSHIP', 'SCOTLAND - LEAGUE ONE',
+           'SCOTLAND - LEAGUE TWO', 'SCOTLAND - PREMIERSHIP', 'SERBIA - PRVA LIGA', 'SERBIA - SUPER LIGA', 'SLOVAKIA - NIKE LIGA',
+           'SLOVENIA - PRVA LIGA', 'SOUTH AFRICA - PREMIER LEAGUE', 'SOUTH AMERICA - COPA LIBERTADORES',
+           'SOUTH AMERICA - COPA SUDAMERICANA', 'SOUTH KOREA - K LEAGUE 1', 'SOUTH KOREA - K LEAGUE 2', 'SPAIN - LALIGA',
+           'SPAIN - LALIGA2', 'SWEDEN - ALLSVENSKAN', 'SWEDEN - SUPERETTAN', 'SWITZERLAND - SUPER LEAGUE',
+           'TURKEY - SUPER LIG', 'UKRAINE - PREMIER LEAGUE', 'URUGUAY - PRIMERA DIVISION', 'USA - MLS',
+           'VENEZUELA - LIGA FUTVE', 'WALES - CYMRU PREMIER'
+           ]
 
 # URL do arquivo CSV que você deseja carregar
 url = (
@@ -142,7 +153,7 @@ if jogos_do_dia is not None:
 
     Jogos = Jogos_do_Dia.sort_values(by='League')
     ligas = Jogos['League'].unique()
-    
+
     # Importando a Base de Dados
     base = pd.read_csv(
         "https://github.com/futpythontrader/YouTube/blob/main/Bases_de_Dados/FlashScore/Base_de_Dados_FlashScore_v2.csv?raw=true")
@@ -181,44 +192,35 @@ if jogos_do_dia is not None:
     Jogos_do_Dia['Jogo'] = Jogos_do_Dia['Home'] + ' x ' + Jogos_do_Dia['Away']
     lista_confrontos = Jogos_do_Dia['Jogo'].tolist()
 
-    # Variavel vazia para armazenar o jogo selecionado
-    Jogo = None
+    # Widgets de seleção (na barra lateral para economizar espaço)
+    with st.sidebar:
+        selected_time = st.selectbox(
+            "Selecione o Horário:", Jogos_do_Dia['Time'].unique())
+        filtered_by_time = Jogos_do_Dia[Jogos_do_Dia['Time'] == selected_time]
 
-    # Função para filtrar e exibir os dados
-    def func(jogo_selecionado):
-        global Jogo
+        selected_league = st.selectbox(
+            "Selecione a Liga:", filtered_by_time['League'].unique())
+        filtered_by_league = filtered_by_time[filtered_by_time['League']
+                                            == selected_league]
 
-    # Seleção do Horario
-    wid_filtro = st.sidebar.selectbox(
-        'Selecione o Horario:', Jogos_do_Dia['Time'].unique(), index=0)
-    df_Hora = Jogos_do_Dia[Jogos_do_Dia['Time'] == wid_filtro]
-    df_Hora = df_Hora[['League', 'Round', 'Date', 'Time', 'Home',
-                       'Away', 'Odd_H', 'Odd_D', 'Odd_A', 'Jogo']]
+        selected_game = st.selectbox(
+            "Escolha o Jogo:", filtered_by_league['Jogo'].unique())
 
-    # Seleção da Liga com base o horario
-    wid_filtro = st.sidebar.selectbox(
-        'Selecione a Liga:', df_Hora['League'].unique(), index=0)
-    df_Liga = df_Hora[df_Hora['League'] == wid_filtro]
-    df_Liga = df_Liga[['League', 'Round', 'Date', 'Time', 'Home',
-                       'Away', 'Odd_H', 'Odd_D', 'Odd_A', 'Jogo']]
-
-    # Seleção do jogo com base na liga
-    wid_filtro = st.sidebar.selectbox(
-        'Escolha o Jogo:', df_Liga['Jogo'].unique(), index=0)
-    df_filtrado = df_Liga[df_Liga['Jogo'] == wid_filtro]
-    df_filtrado = df_filtrado[['League', 'Round', 'Date', 'Time',
-                               'Home', 'Away', 'Odd_H', 'Odd_D', 'Odd_A']]
+    # Exibição do jogo selecionado
+    selected_game_data = filtered_by_league[filtered_by_league['Jogo']
+                                            == selected_game]
 
     # Resentando o index do filtro
-    df_filtrado = drop_reset_index(df_filtrado)
+    selected_game_data = drop_reset_index(selected_game_data)
 
     # Exibição do jogo escolhido
     st.write('**Jogo Selecionado:**')
-    st.write(df_filtrado)
+    st.write(selected_game_data[['League', 'Round', 'Date',
+            'Time', 'Home', 'Away', 'Odd_H', 'Odd_D', 'Odd_A']])
 
     try:
         # Variavél recebe o jogo escolhido
-        Jogo = df_filtrado
+        Jogo = selected_game_data
 
         # Variavel para receber o index do jogo escolhido
         i = 1
@@ -277,11 +279,11 @@ if jogos_do_dia is not None:
         results_filtrado.index += 1
 
        # Verifica se base e df_filtrado não estão vazios para mostrar os últimos 5 jogos home e away
-        if not base.empty and not df_filtrado.empty:
+        if not base.empty and not selected_game_data.empty:
             # Verifica se há pelo menos um valor em 'Home' e 'Away' em df_filtrado
-            if len(df_filtrado) > 0 and 'Home' in df_filtrado.columns and 'Away' in df_filtrado.columns:
-                home_team = df_filtrado['Home'].iloc[0]
-                away_team = df_filtrado['Away'].iloc[0]
+            if len(selected_game_data) > 0 and 'Home' in selected_game_data.columns and 'Away' in selected_game_data.columns:
+                home_team = selected_game_data['Home'].iloc[0]
+                away_team = selected_game_data['Away'].iloc[0]
 
                 # Seleciona os últimos 5 jogos em casa para o time específico
                 last_home_games = base[base['Home'] == home_team].tail(5)
