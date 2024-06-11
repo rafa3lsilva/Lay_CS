@@ -137,16 +137,16 @@ leagues = ['ARGENTINA - COPA DE LA LIGA PROFESIONAL', 'ARGENTINA - LIGA PROFESIO
 
 # URL do arquivo CSV que você deseja carregar
 url = (
-    f'https://github.com/futpythontrader/YouTube/blob/main/Jogos_do_Dia/FlashScore/Jogos_do_Dia_FlashScore_{dia}.csv?raw=true')
+    f'https://github.com/rafa3lsilva/Base_Dados/blob/main/Jogos_do_Dia/Jogos_do_Dia_FlashScore_{dia}.csv?raw=true')
 
 # Carregar os dados
 jogos_do_dia = carregar_dados(url)
 
 # Verificar se os dados foram carregados com sucesso
 if jogos_do_dia is not None:
-    jogos_do_dia = jogos_do_dia[['League', 'Round', 'Date',
+    jogos_do_dia = jogos_do_dia[['League', 'Date',
                                 'Time', 'Home', 'Away', 'Odd_H', 'Odd_D', 'Odd_A']]
-    jogos_do_dia.columns = ['League', 'Round', 'Date', 'Time',
+    jogos_do_dia.columns = ['League', 'Date', 'Time',
                             'Home', 'Away', 'Odd_H', 'Odd_D', 'Odd_A']
     Jogos_do_Dia = jogos_do_dia[jogos_do_dia['League'].isin(leagues) == True]
     Jogos_do_Dia = drop_reset_index(Jogos_do_Dia)
@@ -201,7 +201,7 @@ if jogos_do_dia is not None:
         selected_league = st.selectbox(
             "Selecione a Liga:", filtered_by_time['League'].unique())
         filtered_by_league = filtered_by_time[filtered_by_time['League']
-                                            == selected_league]
+                                              == selected_league]
 
         selected_game = st.selectbox(
             "Escolha o Jogo:", filtered_by_league['Jogo'].unique())
@@ -215,8 +215,8 @@ if jogos_do_dia is not None:
 
     # Exibição do jogo escolhido
     st.write('**Jogo Selecionado:**')
-    st.write(selected_game_data[['League', 'Round', 'Date',
-            'Time', 'Home', 'Away', 'Odd_H', 'Odd_D', 'Odd_A']])
+    st.write(selected_game_data[['League', 'Date',
+                                 'Time', 'Home', 'Away', 'Odd_H', 'Odd_D', 'Odd_A']])
 
     try:
         # Variavél recebe o jogo escolhido
