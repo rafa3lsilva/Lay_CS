@@ -142,15 +142,23 @@ url = (
 # Carregar os dados
 jogos_do_dia = carregar_dados(url)
 
+
 # Verificar se os dados foram carregados com sucesso
 if jogos_do_dia is not None:
     jogos_do_dia = jogos_do_dia[['League', 'Date',
                                 'Time', 'Home', 'Away', 'FT_Odd_H', 'FT_Odd_D', 'FT_Odd_A']]
     jogos_do_dia.columns = ['League', 'Date', 'Time',
                             'Home', 'Away', 'Odd_H', 'Odd_D', 'Odd_A']
+    
+    # Filtro pelas ligas selecionadas
     Jogos_do_Dia = jogos_do_dia[jogos_do_dia['League'].isin(leagues) == True]
     Jogos_do_Dia = drop_reset_index(Jogos_do_Dia)
 
+    # Filtro pela data escolhida
+    Jogos_do_Dia['Date'] = pd.to_datetime(Jogos_do_Dia['Date']).dt.date
+    Jogos_do_Dia = Jogos_do_Dia[Jogos_do_Dia['Date'] == dia]
+
+    # Ordenar os jogos por liga
     Jogos = Jogos_do_Dia.sort_values(by='League')
     ligas = Jogos['League'].unique()
 
