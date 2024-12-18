@@ -4,8 +4,13 @@
 # relevant for Altair.
 #
 # These classes are only for use in type signatures
+from __future__ import annotations
+
 import enum
-from typing import Any, Iterable, Optional, Tuple, Protocol
+from typing import TYPE_CHECKING, Any, Protocol
+
+if TYPE_CHECKING:
+    from collections.abc import Iterable
 
 
 class DtypeKind(enum.IntEnum):
@@ -43,12 +48,9 @@ class DtypeKind(enum.IntEnum):
 # as other libraries won't use an instance of our own Enum in this module but have
 # their own. Type checkers will raise an error on that even though the enums
 # are identical.
-Dtype = Tuple[Any, int, str, str]  # see Column.dtype
-
-
 class Column(Protocol):
     @property
-    def dtype(self) -> Dtype:
+    def dtype(self) -> tuple[Any, int, str, str]:
         """
         Dtype description as a tuple ``(kind, bit-width, format string, endianness)``.
 
@@ -57,7 +59,8 @@ class Column(Protocol):
                         Data Interface format.
         Endianness : current only native endianness (``=``) is supported
 
-        Notes:
+        Notes
+        -----
             - Kind specifiers are aligned with DLPack where possible (hence the
               jump to 20, leave enough room for future extension)
             - Masks must be specified as boolean with either bit width 1 (for bit
@@ -76,7 +79,7 @@ class Column(Protocol):
             - Data types not included: complex, Arrow-style null, binary, decimal,
               and nested (list, struct, map, union) dtypes.
         """
-        pass
+        ...
 
     # Have to use a generic Any return type as not all libraries who implement
     # the dataframe interchange protocol implement the TypedDict that is usually
@@ -86,7 +89,8 @@ class Column(Protocol):
     @property
     def describe_categorical(self) -> Any:
         """
-        If the dtype is categorical, there are two options:
+        If the dtype is categorical, there are two options.
+
         - There are only values in the data buffer.
         - There is a separate non-categorical Column encoding categorical values.
 
@@ -103,13 +107,12 @@ class Column(Protocol):
 
         TBD: are there any other in-memory representations that are needed?
         """
-        pass
+        ...
 
 
 class DataFrame(Protocol):
     """
-    A data frame class, with only the methods required by the interchange
-    protocol defined.
+    A data frame class, with only the methods required by the interchange protocol defined.
 
     A "data frame" represents an ordered collection of named columns.
     A column's "name" must be a unique string.
@@ -123,7 +126,7 @@ class DataFrame(Protocol):
 
     def __dataframe__(
         self, nan_as_null: bool = False, allow_copy: bool = True
-    ) -> "DataFrame":
+    ) -> DataFrame:
         """
         Construct a new exchange object, potentially changing the parameters.
 
@@ -136,21 +139,17 @@ class DataFrame(Protocol):
         necessary if a library supports strided buffers, given that this protocol
         specifies contiguous buffers.
         """
-        pass
+        ...
 
     def column_names(self) -> Iterable[str]:
-        """
-        Return an iterator yielding the column names.
-        """
-        pass
+        """Return an iterator yielding the column names."""
+        ...
 
     def get_column_by_name(self, name: str) -> Column:
-        """
-        Return the column whose name is the indicated name.
-        """
-        pass
+        """Return the column whose name is the indicated name."""
+        ...
 
-    def get_chunks(self, n_chunks: Optional[int] = None) -> Iterable["DataFrame"]:
+    def get_chunks(self, n_chunks: int | None = None) -> Iterable[DataFrame]:
         """
         Return an iterator yielding the chunks.
 
@@ -162,4 +161,4 @@ class DataFrame(Protocol):
         Note that the producer must ensure that all columns are chunked the
         same way.
         """
-        pass
+        ...

@@ -137,7 +137,7 @@ leagues = ['ARGENTINA - COPA DE LA LIGA PROFESIONAL', 'ARGENTINA - LIGA PROFESIO
 
 # URL do arquivo CSV que você deseja carregar
 url = (
-    f'https://github.com/rafa3lsilva/Base_Dados/blob/main/Jogos_do_Dia/Jogos_do_Dia_FlashScore_{dia}.csv?raw=true')
+    f'https://github.com/rafa3lsilva/Projeto_FlashScore/blob/main/base_excel/jogos_do_dia.csv?raw=true')
 
 # Carregar os dados
 jogos_do_dia = carregar_dados(url)
@@ -145,7 +145,7 @@ jogos_do_dia = carregar_dados(url)
 # Verificar se os dados foram carregados com sucesso
 if jogos_do_dia is not None:
     jogos_do_dia = jogos_do_dia[['League', 'Date',
-                                'Time', 'Home', 'Away', 'Odd_H', 'Odd_D', 'Odd_A']]
+                                'Time', 'Home', 'Away', 'FT_Odd_H', 'FT_Odd_D', 'FT_Odd_A']]
     jogos_do_dia.columns = ['League', 'Date', 'Time',
                             'Home', 'Away', 'Odd_H', 'Odd_D', 'Odd_A']
     Jogos_do_Dia = jogos_do_dia[jogos_do_dia['League'].isin(leagues) == True]
@@ -156,9 +156,10 @@ if jogos_do_dia is not None:
 
     # Importando a Base de Dados
     base = pd.read_csv(
-        "https://github.com/futpythontrader/YouTube/blob/main/Bases_de_Dados/FlashScore/Base_de_Dados_FlashScore_v2.csv?raw=true")
+        "https://github.com/rafa3lsilva/Projeto_FlashScore/blob/main/base_excel/base_flashscore.csv?raw=true")
+        
     base = base[['League', 'Date', 'Home', 'Away',
-                'Goals_H', 'Goals_A', 'Odd_H', 'Odd_D', 'Odd_A']]
+                'FT_Goals_H', 'FT_Goals_A', 'FT_Odd_ML_H', 'FT_Odd_ML_D', 'FT_Odd_ML_A']]
     base.columns = ['League', 'Date', 'Home', 'Away',
                     'Goals_H', 'Goals_A', 'Odd_H', 'Odd_D', 'Odd_A']
 
