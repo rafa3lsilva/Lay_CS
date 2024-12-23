@@ -8,7 +8,7 @@ env/
 .venv/
 
 # Ignorar arquivos de log
-*.log
+.log
 
 # Ignorar arquivos de cache do Python
 __pycache__/
