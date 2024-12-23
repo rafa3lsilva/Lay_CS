@@ -25,12 +25,10 @@ Para instalar e executar o projeto localmente, siga os passos abaixo:
     ```
 3. Instale as dependências:
     ```bash
-    [comando para instalar dependências]
     pip install -r requirements.txt
     ```
 4. Execute a aplicação:
     ```bash
-    [comando para executar a aplicação]
     streamlit run app.py
     ```
 
