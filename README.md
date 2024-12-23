@@ -36,7 +36,7 @@ Para instalar e executar o projeto localmente, siga os passos abaixo:
 Contribuições são bem-vindas! Sinta-se à vontade para abrir issues e enviar pull requests. Para maiores informações, consulte o arquivo [CONTRIBUTING.md](CONTRIBUTING.md).
 
 ## Licença
-Este projeto está licenciado sob a licença MIT. Veja o arquivo LICENSE.MD(LICENSE) para mais detalhes.
+Este projeto está licenciado sob a licença MIT. Veja o arquivo [LICENSE.md](LICENSE) para mais detalhes.
 
 ## Contato
-Para mais informações, entre em contato com Rafael em rafaelpjmp@gmail.com.
+Para mais informações, entre em contato com Rafael Almeida em rafaelpjmp@gmail.com.
